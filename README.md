@@ -1,2 +1,2 @@
-# vuln_scan9001
+# Vuln_Scan_9001
 Vulnerability Scanner with a power level of over 9000!!
