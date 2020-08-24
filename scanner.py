@@ -44,10 +44,10 @@ def banner():
 def main():
     print_lock = threading.Lock()
     print("")
-    target = input("Enter your target IP: ")
-    #target = "10.10.50.151"
-    
-    
+    #target = input("Enter your target IP: ")
+    target = "10.10.255.198"
+
+
     current_dir = os.getcwd()
     dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
     os.system(dir_scans)
@@ -97,32 +97,32 @@ def main():
 
         # wait until the thread terminates.
     q.join()
-    
-    
+
+
     print("")
     print("")
     print("#" * 70)
-    print("Running Light Service Enumeration")
+    print("Running Nmap Service Enumeration")
     print("#" * 70)
     print("")
     print("")
     dir_nmap = "mkdir {pwd}/scans/{ip}/nmap 2>/dev/null".format(pwd=current_dir, ip=target)
     os.system(dir_nmap)
-    light_serv_enum = "nmap -p{ports} -sV --version-intensity 0 -Pn -T4 -oN {pwd}/scans/{ip}/nmap/light.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
+    light_serv_enum = "nmap -p{ports} -A -Pn -T4 -oN {pwd}/scans/{ip}/nmap/main.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
     os.system(light_serv_enum)
-    
+
     print("")
     print("")
     print("#" * 70)
-    print("Running Nmap Aggressive Service Enumeration")
+    print("Running Nmap Vulners Enumeration")
     print("#" * 70)
     print("")
     print("")
 
-    heavy_serv_enum = "nmap -p{ports} -A --script=vulners -Pn -T4 -oN {pwd}/scans/{ip}/nmap/heavy.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
+    heavy_serv_enum = "nmap -p{ports} --script=vulners -Pn -T4 -oN {pwd}/scans/{ip}/nmap/vulners.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
     os.system(heavy_serv_enum)
 
-
+    '''
     print("")
     print("")
     print("#" * 70)
@@ -130,7 +130,7 @@ def main():
     print("#" * 70)
     print("")
     print("")
-    
+
 
     vulscan_dir = "mkdir {pwd}/scans/{ip}/vulscan 2>/dev/null".format(pwd=current_dir, ip=target)
     os.system(vulscan_dir)
@@ -144,7 +144,7 @@ def main():
             pass
     print("")
     print("Output Files Saved at ./scans/ip_address/vulscan")
-    
+    '''
 
     if "80" in open_ports:
         print("")
@@ -180,8 +180,8 @@ def main():
         os.system(gobust)
     else:
         pass
-    
-    
+
+
     if "22" in open_ports:
         print("")
         print("")
@@ -194,7 +194,7 @@ def main():
         os.system(ssh_nmap)
     else:
         pass
-    
+
     if "445" in open_ports:
         print("")
         print("")
@@ -242,8 +242,8 @@ def main():
         os.system(enum4linux)
     else:
         pass
-    
-    
+
+
     if "21" in open_ports:
         print("")
         print("")
@@ -252,21 +252,161 @@ def main():
         print("#" * 70)
         print("")
         print("")
-        ftp_enum = "nmap -p21 -sV --script=ftp-anon,ftp-bounce,ftp-libopie,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221 -Pn -oN {pwd}/scans/{ip}/nmap/ftp.txt {ip}".format(ip=target)
+        ftp_enum = "nmap -p21 -sV --script=ftp-anon,ftp-bounce,ftp-libopie,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221 -Pn -oN {pwd}/scans/{ip}/nmap/ftp.txt {ip}".format(pwd=current_dir, ip=target)
         os.system(ftp_enum)
-    
+
+def part():
+	print_lock = threading.Lock()
+	print("")
+	target = input("Enter your target IP: ")
+
+
+	current_dir = os.getcwd()
+	dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
+	os.system(dir_scans)
+	dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
+	os.system(dir_ip)
+	print("")
+	print("#" * 70)
+	print("Scanning for Open Ports")
+	print("#" * 70)
+	print("")
+	print("")
+
+	open_ports = []
+
+	def portscan(port):
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		try:
+			con = s.connect((target,port))
+			with print_lock:
+				print('Port %s is Open' %port)
+				open_ports.append(str(port))
+				con.close()
+		except:
+			pass
+            #print("fail")
+
+
+	def threader():
+		while True:
+			worker = q.get()
+			portscan(worker)
+			q.task_done()
+
+	q = Queue()
+
+	for x in range(100):
+		t = threading.Thread(target=threader)
+		t.daemon = True
+		t.start()
+
+
+		start = time.time()
+
+############## NEED to change to 65535
+	for worker in range(1,65535):
+		q.put(worker)
+
+        # wait until the thread terminates.
+	q.join()
+
+
+	print("")
+	print("")
+	print("#" * 70)
+	print("Running Nmap Service Enumeration")
+	print("#" * 70)
+	print("")
+	print("")
+	dir_nmap = "mkdir {pwd}/scans/{ip}/nmap 2>/dev/null".format(pwd=current_dir, ip=target)
+	os.system(dir_nmap)
+	light_serv_enum = "nmap -p{ports} -A -Pn -T4 -oN {pwd}/scans/{ip}/nmap/main.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
+	os.system(light_serv_enum)
+
+	print("")
+	print("")
+	print("#" * 70)
+	print("Running Nmap Vulners Enumeration")
+	print("#" * 70)
+	print("")
+	print("")
+
+	heavy_serv_enum = "nmap -p{ports} --script=vulners -Pn -T4 -oN {pwd}/scans/{ip}/nmap/vulners.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
+	os.system(heavy_serv_enum)
+
+
+def scan():
+	print_lock = threading.Lock()
+	print("")
+	target = input("Enter your target IP: ")
+
+
+    #current_dir = os.getcwd()
+    #dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
+    #os.system(dir_scans)
+    #dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
+    #os.system(dir_ip)
+	print("")
+	print("#" * 70)
+	print("Scanning for Open Ports")
+	print("#" * 70)
+	print("")
+	print("")
+
+	open_ports = []
+
+	def portscan(port):
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		try:
+			con = s.connect((target,port))
+			with print_lock:
+				print('Port %s is Open' %port)
+				open_ports.append(str(port))
+				con.close()
+		except:
+			pass
+            #print("fail")
+
+
+	def threader():
+		while True:
+			worker = q.get()
+			portscan(worker)
+			q.task_done()
+
+	q = Queue()
+
+	for x in range(100):
+		t = threading.Thread(target=threader)
+		t.daemon = True
+		t.start()
+
+
+	start = time.time()
+
+############## NEED to change to 65535
+	for worker in range(1,65535):
+		q.put(worker)
+
+        # wait until the thread terminates.
+	q.join()
+
+
 try:
-    banner()
-    print("1 = Full    2 = Fast")
-    choice = input("Do you want Full or Fast Scan? ")
-    if choice == "1":
-        main()
-    elif choice == "2":
-        part()
-    else:
-        print("Invalid Entry.  Exiting.")
-        sys.exit()
-        
+	banner()
+	print("1 = Full    2 = Fast    3 = Port Scan")
+	choice = input("Do you want Full or Fast Scan? ")
+	if choice == "1":
+		main()
+	elif choice == "2":
+		part()
+	elif choice == "3":
+		scan()
+	else:
+		print("Invalid Entry.  Exiting.")
+		sys.exit()
+
 except KeyboardInterrupt:
     print("\nGoodbye!")
     quit()
