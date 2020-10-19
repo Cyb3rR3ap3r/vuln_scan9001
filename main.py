@@ -83,7 +83,7 @@ def main():
 
     q = Queue()
 
-    for x in range(100):
+    for x in range(200):
         t = threading.Thread(target=threader)
         t.daemon = True
         t.start()
@@ -227,11 +227,11 @@ def part():
 	target = input("Enter your target IP: ")
 
 
-	#current_dir = os.getcwd()
-	#dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
-	#os.system(dir_scans)
-	#dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
-	#os.system(dir_ip)
+	current_dir = os.getcwd()
+	dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
+	os.system(dir_scans)
+	dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
+	os.system(dir_ip)
 	print("")
 	print("#" * 70)
 	print("Scanning for Open Ports")
@@ -243,6 +243,25 @@ def part():
 
 	def portscan(port):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		if port == 1000:
+			print("10%")
+		if port == 5000:
+			print("20%")
+		if port == 10000:
+			print("30%")
+		if port == 20000:
+			print("40%")
+		if port == 30000:
+			print("50%")
+		if port == 40000:
+			print("60%")
+		if port == 50000:
+			print("70%")
+		if port == 60000:
+			print("80%")
+		if port == 65000:
+			print("90%")
+
 		try:
 			con = s.connect((target,port))
 			with print_lock:
@@ -262,7 +281,7 @@ def part():
 
 	q = Queue()
 
-	for x in range(100):
+	for x in range(200):
 		t = threading.Thread(target=threader)
 		t.daemon = True
 		t.start()
@@ -273,6 +292,7 @@ def part():
 ############## NEED to change to 65535
 	for worker in range(1,65535):
 		q.put(worker)
+
 
         # wait until the thread terminates.
 	q.join()
@@ -313,6 +333,24 @@ def scan():
 
 	def portscan(port):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		if port == 1000:
+			print("10%")
+		if port == 5000:
+			print("20%")
+		if port == 10000:
+			print("30%")
+		if port == 20000:
+			print("40%")
+		if port == 30000:
+			print("50%")
+		if port == 40000:
+			print("60%")
+		if port == 50000:
+			print("70%")
+		if port == 60000:
+			print("80%")
+		if port == 65000:
+			print("90%")
 		try:
 			con = s.connect((target,port))
 			with print_lock:
@@ -332,7 +370,7 @@ def scan():
 
 	q = Queue()
 
-	for x in range(100):
+	for x in range(200):
 		t = threading.Thread(target=threader)
 		t.daemon = True
 		t.start()
