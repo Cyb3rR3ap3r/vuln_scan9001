@@ -44,8 +44,8 @@ def banner():
 def main():
     print_lock = threading.Lock()
     print("")
-    #target = input("Enter your target IP: ")
-    target = "10.10.255.198"
+    target = input("Enter your target IP: ")
+    #target = "10.10.255.198"
 
 
     current_dir = os.getcwd()
@@ -111,40 +111,6 @@ def main():
     light_serv_enum = "nmap -p{ports} -A -Pn -T4 -oN {pwd}/scans/{ip}/nmap/main.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
     os.system(light_serv_enum)
 
-    print("")
-    print("")
-    print("#" * 70)
-    print("Running Nmap Vulners Enumeration")
-    print("#" * 70)
-    print("")
-    print("")
-
-    heavy_serv_enum = "nmap -p{ports} --script=vulners -Pn -T4 -oN {pwd}/scans/{ip}/nmap/vulners.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
-    os.system(heavy_serv_enum)
-
-    '''
-    print("")
-    print("")
-    print("#" * 70)
-    print("Running Vulscan")
-    print("#" * 70)
-    print("")
-    print("")
-
-
-    vulscan_dir = "mkdir {pwd}/scans/{ip}/vulscan 2>/dev/null".format(pwd=current_dir, ip=target)
-    os.system(vulscan_dir)
-
-    for num in range(1,65535):
-        if str(num) in open_ports:
-            vulscan = "nmap -p{ports} -sV --script=vulscan/vulscan.nse -Pn -oN {pwd}/scans/{ip}/vulscan/port_{ports}.txt {ip} >/dev/null".format(ports=num, pwd=current_dir, ip=target)
-            print("Scanning for Vulnerabilities on Port %s" %num)
-            os.system(vulscan)
-        else:
-            pass
-    print("")
-    print("Output Files Saved at ./scans/ip_address/vulscan")
-    '''
 
     if "80" in open_ports:
         print("")
@@ -261,11 +227,11 @@ def part():
 	target = input("Enter your target IP: ")
 
 
-	current_dir = os.getcwd()
-	dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
-	os.system(dir_scans)
-	dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
-	os.system(dir_ip)
+	#current_dir = os.getcwd()
+	#dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
+	#os.system(dir_scans)
+	#dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
+	#os.system(dir_ip)
 	print("")
 	print("#" * 70)
 	print("Scanning for Open Ports")
@@ -323,17 +289,6 @@ def part():
 	os.system(dir_nmap)
 	light_serv_enum = "nmap -p{ports} -A -Pn -T4 -oN {pwd}/scans/{ip}/nmap/main.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
 	os.system(light_serv_enum)
-
-	print("")
-	print("")
-	print("#" * 70)
-	print("Running Nmap Vulners Enumeration")
-	print("#" * 70)
-	print("")
-	print("")
-
-	heavy_serv_enum = "nmap -p{ports} --script=vulners -Pn -T4 -oN {pwd}/scans/{ip}/nmap/vulners.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
-	os.system(heavy_serv_enum)
 
 
 def scan():
