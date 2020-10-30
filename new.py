@@ -62,12 +62,32 @@ def main():
 
     open_ports = []
 
+
+
     def portscan(port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if port == 1000:
+            print("10% Complete")
+        if port == 5000:
+            print("20% Complete")
+        if port == 10000:
+            print("30% Complete")
+        if port == 20000:
+            print("40% Complete")
+        if port == 30000:
+            print("50% Complete")
+        if port == 40000:
+            print("60% Complete")
+        if port == 50000:
+            print("70% Complete")
+        if port == 60000:
+            print("80% Complete")
+        if port == 65000:
+            print("90% Complete")
         try:
             con = s.connect((target,port))
             with print_lock:
-                print('Port %s is Open' %port)
+                #print('Port %s is Open' %port)
                 open_ports.append(str(port))
                 con.close()
         except:
@@ -92,7 +112,7 @@ def main():
     start = time.time()
 
 ############## NEED to change to 65535
-    for worker in range(1,65535):
+    for worker in range(1,5000):
         q.put(worker)
 
         # wait until the thread terminates.
@@ -108,58 +128,89 @@ def main():
     print("")
     dir_nmap = "mkdir {pwd}/scans/{ip}/nmap 2>/dev/null".format(pwd=current_dir, ip=target)
     os.system(dir_nmap)
-    light_serv_enum = "nmap -p{ports} -A -Pn -T4 -oN {pwd}/scans/{ip}/nmap/main.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
+    light_serv_enum = "nmap -p{ports} -sV -Pn -T4 -oN {pwd}/scans/{ip}/nmap/main.txt {ip}".format(ports=",".join(open_ports), pwd=current_dir, ip=target)
     os.system(light_serv_enum)
+    print("######\n")
+
+    # Enumerate HTTP
+
+    find_http = subprocess.check_output("cat {pwd}/scans/{ip}/nmap/main.txt | grep tcp | grep open | grep http".format(pwd=current_dir, ip=target), shell=True)
+    find_http1 = find_http.decode('utf8')
+
+    if "http" in find_http1:
+
+        http_ports = subprocess.check_output("cat {pwd}/scans/{ip}/nmap/main.txt | grep tcp | grep http | cut -d ' ' -f 1 | cut -d '/' -f 1 | tr '\n' ',' | rev | cut -c 2- | rev".format(pwd=current_dir, ip=target), shell=True)
+        open_http = http_ports.decode('utf8').rstrip().split(',')
 
 
-    if "80" in open_ports:
+    for x in open_http:
         print("")
         print("")
         print("#" * 70)
-        print("Running HTTP Enumeration on Port 80  -  Nmap")
+        print("Running HTTP Enumeration on Port {x}  -  Nmap".format(x=x))
         print("#" * 70)
         print("")
         print("")
-        http_nmap = "nmap -p80 --script=http-apache-server-status,http-aspnet-debug,http-auth,http-auth-finder,http-backup-finder,http-brute,http-coldfusion-subzero,http-comments-displayer,http-config-backup,http-cookie-flags,http-default-accounts,http-enum,http-headers,http-methods,http-ntlm-info,http-userdir-enum,http-sql-injection,http-sql-injection,http-server-header -Pn -oN {pwd}/scans/{ip}/nmap/http.txt {ip}".format(pwd=current_dir, ip=target)
+        http_nmap = "nmap -p{x} -A -Pn -oN {pwd}/scans/{ip}/nmap/{x}-http.txt {ip}".format(x=x, pwd=current_dir, ip=target)
         os.system(http_nmap)
         print("")
         print("")
         print("#" * 70)
-        print("Running HTTP Enumeration on Port 80  -  Nikto")
+        print("Running HTTP Enumeration on Port {x}  -  Dirsearch".format(x=x))
         print("#" * 70)
         print("")
         print("")
-        dir_nikto = "mkdir {pwd}/scans/{ip}/nikto".format(pwd=current_dir, ip=target)
-        os.system(dir_nikto)
-        nikto = "nikto -h {ip} -Tuning x,6 -maxtime 40m -output {pwd}/scans/{ip}/nikto/40min_scan.txt".format(ip=target, pwd=current_dir)
-        os.system(nikto)
-        print("")
-        print("")
-        print("#" * 70)
-        print("Busting Directories on Port 80  -  Gobuster")
-        print("#" * 70)
-        print("")
-        print("")
-        dir_go = "mkdir {pwd}/scans/{ip}/gobuster".format(pwd=current_dir, ip=target)
-        os.system(dir_go)
-        gobust = "gobuster dir -u {ip} -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -o {pwd}/scans/{ip}/gobuster".format(ip=target, pwd=current_dir)
-        os.system(gobust)
-    else:
-        pass
+        dirsearch = "dirsearch -u http://{ip}:{x} -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x 400,500 -e php,asp,aspx,html,txt,bak,old,war,jsp -f -r -t 100".format(ip=target, x=x)
+        os.system(dirsearch)
 
 
-    if "22" in open_ports:
-        print("")
-        print("")
-        print("#" * 70)
-        print("Running SSH Enumeration on Port 22  -  Nmap")
-        print("#" * 70)
-        print("")
-        print("")
-        ssh_nmap = "nmap -p22 --script=ssh-auth-methods,ssh-hostkey,ssh-publickey-acceptance -Pn -oN {pwd}/scans/{ip}/nmap/ssh.txt {ip}".format(pwd=current_dir, ip=target)
-        os.system(ssh_nmap)
-    else:
-        pass
+    # Enumerate FTP
+
+    find_ftp = subprocess.check_output("cat {pwd}/scans/{ip}/nmap/main.txt | grep tcp | grep open | grep ftp".format(pwd=current_dir, ip=target), shell=True)
+    find_ftp1 = find_ftp.decode('utf8')
+
+    if "ftp" in find_ftp1:
+
+        ftp_ports = subprocess.check_output("cat {pwd}/scans/{ip}/nmap/main.txt | grep tcp | grep ftp | cut -d ' ' -f 1 | cut -d '/' -f 1 | tr '\n' ',' | rev | cut -c 2- | rev".format(pwd=current_dir, ip=target), shell=True)
+        open_ftp = ftp_ports.decode('utf8').rstrip().split(',')
+
+
+
+        for x in open_ftp:
+            print("")
+            print("")
+            print("#" * 70)
+            print("Running FTP Enumeration on Port {x}  -  Nmap".format(x=x))
+            print("#" * 70)
+            print("")
+            print("")
+            ftp_enum = "nmap -p{x} -A -Pn -oN {pwd}/scans/{ip}/nmap/{x}-ftp.txt {ip}".format(x=x, pwd=current_dir, ip=target)
+            os.system(ftp_enum)
+
+
+    # Enumerate SSH
+
+    find_ssh = subprocess.check_output("cat {pwd}/scans/{ip}/nmap/main.txt | grep tcp | grep open | grep ssh".format(pwd=current_dir, ip=target), shell=True)
+    find_ssh1 = find_ssh.decode('utf8')
+
+    if "ssh" in find_ssh1:
+
+        ssh_ports = subprocess.check_output("cat {pwd}/scans/{ip}/nmap/main.txt | grep tcp | grep ssh | cut -d ' ' -f 1 | cut -d '/' -f 1 | tr '\n' ',' | rev | cut -c 2- | rev".format(pwd=current_dir, ip=target), shell=True)
+        open_ssh = ssh_ports.decode('utf8').rstrip().split(',')
+
+
+
+        for x in open_ssh:
+            print("")
+            print("")
+            print("#" * 70)
+            print("Running SSH Enumeration on Port {x}  -  Nmap".format(x=x))
+            print("#" * 70)
+            print("")
+            print("")
+            ssh_enum = "nmap -p{x} -A -Pn -oN {pwd}/scans/{ip}/nmap/{x}-ftp.txt {ip}".format(x=x, pwd=current_dir, ip=target)
+            os.system(ssh_enum)
+
 
     if "445" in open_ports:
         print("")
@@ -169,7 +220,7 @@ def main():
         print("#" * 70)
         print("")
         print("")
-        smb_enum = "nmap -p139,445 --script=smb-security-mode,smb-double-pulsar-backdoor,smb-enum-domains,smb-enum-groups,smb-enum-processes,smb-enum-services,smb-enum-sessions,smb-enum-shares,smb-enum-users,smb-os-discovery,smb-protocols,smb-server-stats,smb-system-info,smb-vuln-ms17-010,smb-vuln-webexec -Pn -oN {pwd}/scans/{ip}/nmap/smb.txt {ip}".format(pwd=current_dir, ip=target)
+        smb_enum = "nmap -p139,445 -A -Pn -oN {pwd}/scans/{ip}/nmap/smb.txt {ip}".format(pwd=current_dir, ip=target)
         os.system(smb_enum)
         print("")
         print("")
@@ -210,17 +261,6 @@ def main():
         pass
 
 
-    if "21" in open_ports:
-        print("")
-        print("")
-        print("#" * 70)
-        print("Running FTP Enumeration on Port 21  -  Nmap")
-        print("#" * 70)
-        print("")
-        print("")
-        ftp_enum = "nmap -p21 -sV --script=ftp-anon,ftp-bounce,ftp-libopie,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221 -Pn -oN {pwd}/scans/{ip}/nmap/ftp.txt {ip}".format(pwd=current_dir, ip=target)
-        os.system(ftp_enum)
-
 def part():
 	print_lock = threading.Lock()
 	print("")
@@ -244,28 +284,28 @@ def part():
 	def portscan(port):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		if port == 1000:
-			print("10%")
+			print("10% Complete")
 		if port == 5000:
-			print("20%")
+			print("20% Complete")
 		if port == 10000:
-			print("30%")
+			print("30% Complete")
 		if port == 20000:
-			print("40%")
+			print("40% Complete")
 		if port == 30000:
-			print("50%")
+			print("50% Complete")
 		if port == 40000:
-			print("60%")
+			print("60% Complete")
 		if port == 50000:
-			print("70%")
+			print("70% Complete")
 		if port == 60000:
-			print("80%")
+			print("80% Complete")
 		if port == 65000:
-			print("90%")
+			print("90% Complete")
 
 		try:
 			con = s.connect((target,port))
 			with print_lock:
-				print('Port %s is Open' %port)
+				#print('Port %s is Open' %port)
 				open_ports.append(str(port))
 				con.close()
 		except:
@@ -311,91 +351,16 @@ def part():
 	os.system(light_serv_enum)
 
 
-def scan():
-	print_lock = threading.Lock()
-	print("")
-	target = input("Enter your target IP: ")
-
-
-    #current_dir = os.getcwd()
-    #dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
-    #os.system(dir_scans)
-    #dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
-    #os.system(dir_ip)
-	print("")
-	print("#" * 70)
-	print("Scanning for Open Ports")
-	print("#" * 70)
-	print("")
-	print("")
-
-	open_ports = []
-
-	def portscan(port):
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		if port == 1000:
-			print("10%")
-		if port == 5000:
-			print("20%")
-		if port == 10000:
-			print("30%")
-		if port == 20000:
-			print("40%")
-		if port == 30000:
-			print("50%")
-		if port == 40000:
-			print("60%")
-		if port == 50000:
-			print("70%")
-		if port == 60000:
-			print("80%")
-		if port == 65000:
-			print("90%")
-		try:
-			con = s.connect((target,port))
-			with print_lock:
-				print('Port %s is Open' %port)
-				open_ports.append(str(port))
-				con.close()
-		except:
-			pass
-            #print("fail")
-
-
-	def threader():
-		while True:
-			worker = q.get()
-			portscan(worker)
-			q.task_done()
-
-	q = Queue()
-
-	for x in range(200):
-		t = threading.Thread(target=threader)
-		t.daemon = True
-		t.start()
-
-
-	start = time.time()
-
-############## NEED to change to 65535
-	for worker in range(1,65535):
-		q.put(worker)
-
-        # wait until the thread terminates.
-	q.join()
 
 
 try:
 	banner()
-	print("1 = Full    2 = Fast    3 = Port Scan")
+	print("1 = Full    2 = Fast")
 	choice = input("Do you want Full or Fast Scan? ")
 	if choice == "1":
 		main()
 	elif choice == "2":
 		part()
-	elif choice == "3":
-		scan()
 	else:
 		print("Invalid Entry.  Exiting.")
 		sys.exit()
