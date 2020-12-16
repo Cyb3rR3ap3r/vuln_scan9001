@@ -48,7 +48,7 @@ def main():
     #target = "10.10.255.198"
 
 
-    current_dir = os.getcwd()
+    current_dir = "/root"
     dir_scans = "mkdir {pwd}/scans 2>/dev/null".format(pwd=current_dir)
     os.system(dir_scans)
     dir_ip = "mkdir {pwd}/scans/{ip} 2>/dev/null".format(pwd=current_dir, ip=target)
@@ -112,7 +112,7 @@ def main():
     start = time.time()
 
 ############## NEED to change to 65535
-    for worker in range(1,5000):
+    for worker in range(1,65535):
         q.put(worker)
 
         # wait until the thread terminates.
@@ -305,12 +305,13 @@ def part():
 		try:
 			con = s.connect((target,port))
 			with print_lock:
-				#print('Port %s is Open' %port)
+				print('Port %s is Open' %port)
 				open_ports.append(str(port))
 				con.close()
 		except:
 			pass
-            #print("fail")
+			#print("fail")
+
 
 
 	def threader():
