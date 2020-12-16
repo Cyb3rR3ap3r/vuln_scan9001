@@ -7,4 +7,4 @@ To Do:
 * Add more enumeration tools for full scan
 * Add option to change speed of Port Scanner
 * Add searchsploit results
-
+* Add VulnDB API calls
