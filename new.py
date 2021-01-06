@@ -42,6 +42,7 @@ def banner():
 
 
 def main():
+    socket.setdefaulttimeout(0.30)
     print_lock = threading.Lock()
     print("")
     target = input("Enter your target IP: ")
@@ -87,7 +88,7 @@ def main():
         try:
             con = s.connect((target,port))
             with print_lock:
-                #print('Port %s is Open' %port)
+                print('Port %s is Open' %port)
                 open_ports.append(str(port))
                 con.close()
         except:
@@ -262,6 +263,7 @@ def main():
 
 
 def part():
+	socket.setdefaulttimeout(0.30)
 	print_lock = threading.Lock()
 	print("")
 	target = input("Enter your target IP: ")
